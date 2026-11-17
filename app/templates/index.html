@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LedgerBridge // Month-End Reconciliation</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="https://unpkg.com/htmx.org@2.0.3"></script>
+</head><body>
+<header class="topbar"><a class="brand" href="/">LedgerBridge <span>//</span> Month-End Reconciliation</a><div class="topbar-actions"><span class="engine-badge">● Stateless O(N) Engine</span><button class="btn btn-ghost" hx-post="/api/reconcile/default" hx-target="#recon-workspace" hx-swap="innerHTML" hx-disabled-elt="this">Reload sample</button></div></header>
+<main class="shell">
+  <section class="intro"><div><p class="kicker">FINANCE CONTROL SURFACE</p><h1>Every rupee, <em>accounted for.</em></h1><p>Trace instant platform receivables to delayed bank settlement with a Decimal-exact audit trail.</p></div><details class="upload-panel"><summary>Upload two CSV ledgers <span>+</span></summary><form hx-post="/api/reconcile/upload" hx-encoding="multipart/form-data" hx-target="#recon-workspace" hx-swap="innerHTML"><label>Platform ledger <input name="platform_file" type="file" accept=".csv" required></label><label>Bank settlement statement <input name="bank_file" type="file" accept=".csv" required></label><button class="btn" type="submit" hx-disabled-elt="this">Reconcile uploads</button></form></details></section>
+  <div id="recon-workspace">{% include 'partials/results.html' %}</div>
+  <details class="methodology"><summary>Assumptions &amp; Methodology <span>+</span></summary><div><p><b>Settlement SLA.</b> Cleared funds arrive T+1 to T+2 calendar days after capture; October 30–31 timing gaps are valid next-month rollovers.</p><p><b>Rounding.</b> The platform sums six-decimal 1.75% fee calculations before rounding; the bank rounds each row using ROUND_HALF_UP.</p><p><b>Matching.</b> Captures match on <code>transaction_id</code>; refunds point to platform captures through <code>parent_transaction_id</code>. All timestamps are UTC and amounts are INR.</p></div></details>
+</main><footer>LEDGERBRIDGE · UTC NORMALIZED · INR · NO PERSISTENT CUSTOMER DATA</footer>
+<script>
+function exportAuditCsv(){const rows=[...document.querySelectorAll('#gap-table-body tr')];const esc=v=>'"'+v.replaceAll('"','""')+'"';const text=[['Gap type','Transaction ID','Impact','Audit detail'],...rows.map(r=>[...r.querySelectorAll('td')].map(c=>c.innerText.trim()))].map(r=>r.map(esc).join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:'text/csv'}));a.download='reconciliation_audit_report.csv';a.click();URL.revokeObjectURL(a.href)}
+</script></body></html>
